@@ -1,0 +1,7 @@
+---
+name: Kubernetes infra example OS 
+category:  Interactive Apps
+subcategory: Cloud 
+role: batch_connect
+description: Kubernetes infrastructure built with ansible and kubespray over OpenStack. Based on https://gitlab.ics.muni.cz/cloud/kubernetes/kubernetes-infra-example
+icon: logo.png

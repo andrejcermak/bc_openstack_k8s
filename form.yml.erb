@@ -1,0 +1,47 @@
+<%
+require 'json'
+user = OodSupport::User.new
+projects_file = File.read("/home/#{user}/projects.json")
+
+# Parse the JSON output
+projects = JSON.parse(projects_file)
+
+%>
+
+---
+cluster:
+  - "40-coder-xcermak5"
+workspace_name: "workspace"
+form:
+ - project_id
+ - control_nodes_count
+ - worker_nodes_count
+attributes:
+  project_id:
+    widget: "select"
+    label: "Select project"
+    help: |
+      Select your openstack project
+    options:
+    <%- projects.each do |project| %>
+    - ["<%= project['name'] %>", "<%= project['id'] %>"]
+    <%- end %>
+  control_nodes_count: 
+    widget: "number_field"
+    label: "Number of kubernetes control nodes"
+    value: 1
+    help: |
+      Select number of control nodes based on your needs
+    min: 1
+    max: 5
+    step: 1
+  worker_nodes_count: 
+    widget: "number_field"
+    label: "Number of kubernetes worker nodes"
+    value: 1
+    help: |
+      Select number of worker nodes based on your needs
+    min: 1
+    max: 5
+    step: 1
+

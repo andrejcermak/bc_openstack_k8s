@@ -1,0 +1,12 @@
+---
+batch_connect:
+  template: "basic"
+script:
+  native:
+    workspace_name: "kube-infra"
+    template_id: "9ce1c4d0-1aef-4923-a950-b66f2b274263"
+    org_id: "8c4cfce5-7124-400f-8245-2385a2dbc54b"
+    project_id: <%=project_id %>
+    coder_parameters:
+      control_nodes_count: <%= control_nodes_count %>
+      worker_nodes_count: <%= worker_nodes_count %>

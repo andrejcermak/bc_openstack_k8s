@@ -1,0 +1,32 @@
+<%
+require 'net/http'
+require 'uri'
+require 'ostruct'
+
+# info = OpenStruct.new(ood_connection_info: { host: "195.113.243.245", port: 80 }, id: "16184357-7b28-4251-9ed6-05215931aba7")
+if info.ood_connection_info&.dig(:host)
+  url = "http://#{info.ood_connection_info&.dig(:host)}:8080/kubernetes-infra-example/ansible/artifacts/admin.conf"
+  uri = URI.parse(url)
+  begin
+    response = Net::HTTP.get_response(uri)
+    fetched_content = response.body if response.is_a?(Net::HTTPSuccess)
+  rescue Errno::ECONNREFUSED => e
+    puts "Connection refused: #{e.message}"
+    fetched_content = nil
+  end
+end
+%>
+<% if fetched_content %>
+<p>
+  <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample<%=info.id%>" aria-expanded="false" aria-controls="collapseExample">
+    Show kubeconfig
+  </button>
+ <button class="btn btn-link" type="button" onclick='location.href="/rnode/<%= info.ood_connection_info&.dig(:host) %>/8080/kubernetes-infra-example/ansible/artifacts/admin.conf"'> Download kubeconfig </button>
+</p>
+<div class="collapse" id="collapseExample<%=info.id%>">
+  <div class="card card-body">
+<pre><%= fetched_content %></pre> </div>
+</div>
+<% else %>
+<div> Your kubeconfig should appear here once the setup is complete </div>
+<% end %>
