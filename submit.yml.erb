@@ -4,9 +4,13 @@ batch_connect:
 script:
   native:
     workspace_name: "kube-infra"
-    template_id: "9ce1c4d0-1aef-4923-a950-b66f2b274263"
-    org_id: "8c4cfce5-7124-400f-8245-2385a2dbc54b"
+    #template_version_id: "f8ffd466-8366-4a52-b872-7ee88661bf16"
+    template_version_id: "92b62d7d-0ddc-4739-92ac-9c079ae44203"
+    org_id: "e6cc4dfc-227d-48b0-b09e-6ec3eec7d490"
     project_id: <%=project_id %>
     coder_parameters:
       control_nodes_count: <%= control_nodes_count %>
       worker_nodes_count: <%= worker_nodes_count %>
+      pubkey: <%= ssh_public_key%>
+      infra_name: <%= infra_name %>
+      worker_node_flavor: <%= worker_node_flavor %> 

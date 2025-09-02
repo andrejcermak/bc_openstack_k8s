@@ -18,7 +18,7 @@ end
 %>
 <% if fetched_content %>
 <p>
-  <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample<%=info.id%>" aria-expanded="false" aria-controls="collapseExample">
+  <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample<%=info.id%>" aria-expanded="false" aria-controls="collapseExample">
     Show kubeconfig
   </button>
  <button class="btn btn-link" type="button" onclick='location.href="/rnode/<%= info.ood_connection_info&.dig(:host) %>/8080/kubernetes-infra-example/ansible/artifacts/admin.conf"'> Download kubeconfig </button>

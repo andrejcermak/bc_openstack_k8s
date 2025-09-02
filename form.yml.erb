@@ -1,21 +1,79 @@
-<%
 require 'json'
-user = OodSupport::User.new
-projects_file = File.read("/home/#{user}/projects.json")
 
-# Parse the JSON output
-projects = JSON.parse(projects_file)
+Dir.glob('/var/lib/gems/3.1.0/gems/*').each do |dir|
+  if File.directory?(dir) && dir.end_with?('-lib') == false
+    $LOAD_PATH.unshift("#{dir}/lib")
+  end
+end
+
+
+require "fog/openstack"
+
+user = OodSupport::User.new
+
+token_json = JSON.parse(File.read("/home/#{user}/token.json"))
+access_token = token_json["id"]
+user_id = token_json["user_id"]
+auth_url = "https://identity.brno.openstack.cloud.e-infra.cz/v3"
+
+connection_params = {
+   openstack_auth_url: auth_url,
+   openstack_management_url: auth_url,
+   openstack_auth_token: access_token,
+}
+identity = Fog::OpenStack::Identity.new(connection_params)
+
+projects = identity.list_user_projects(user_id).body["projects"]
+
+flavors = []
+projects.each do |project|
+ auth = {
+    "auth": {
+        "identity": {
+            "methods": [
+                "token"
+            ],
+            "token": {
+                "id": access_token
+            }
+        },
+        "scope": {
+            "project": {
+                "id": project['id']
+            }
+        }
+    }
+  }
+  scoped_token = identity.tokens.authenticate(auth)
+
+  connection_params = {
+    openstack_auth_url: auth_url,
+    openstack_project_name: project['name'],
+    openstack_management_url: "https://compute.brno.openstack.cloud.e-infra.cz/v2.1/#{project['id']}",
+    openstack_auth_token: scoped_token,
+  }
+  compute = Fog::OpenStack::Compute.new(connection_params)
+  compute.flavors.each do |flavor|
+    flavors << [
+      flavor.name, 
+      flavor.name,
+      project['id']
+    ]
+  end
+end
 
 %>
-
 ---
 cluster:
-  - "40-coder-xcermak5"
+  - "43-coder-ood"
 workspace_name: "workspace"
 form:
  - project_id
+ - infra_name
+ - ssh_public_key
  - control_nodes_count
  - worker_nodes_count
+ - worker_node_flavor
 attributes:
   project_id:
     widget: "select"
@@ -25,7 +83,19 @@ attributes:
     options:
     <%- projects.each do |project| %>
     - ["<%= project['name'] %>", "<%= project['id'] %>"]
+    # - ["<%= project['name'] %>"]
     <%- end %>
+  infra_name:
+    widget: "text_field"
+    label: "Infrastructure name"
+    help: |
+      Name for your kubernetes cluster
+    value: "k8s-infra"
+  ssh_public_key:
+    widget: "text_field"
+    label: "ssh public key"
+    help: |
+      Insert your public key to enable ssh
   control_nodes_count: 
     widget: "number_field"
     label: "Number of kubernetes control nodes"
@@ -44,4 +114,14 @@ attributes:
     min: 1
     max: 5
     step: 1
+  worker_node_flavor:
+    widget: "select"
+    label: "Select worker node flavor"
+    help: |
+      Select your worker node flavor
+    options:
+    <%- flavors.each do |flavor| %>
+    - ["<%= flavor[0] %>", "<%= flavor[1] %>",
+    data-exclusive-option-for-project-id-<%= flavor[2]%>: true]
+   <%- end %>
 
