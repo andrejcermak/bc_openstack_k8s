@@ -1,3 +1,4 @@
+<%
 require 'json'
 
 Dir.glob('/var/lib/gems/3.1.0/gems/*').each do |dir|
@@ -10,8 +11,12 @@ end
 require "fog/openstack"
 
 user = OodSupport::User.new
+token_file = "/tmp/#{user}-os-token.json"
+unless File.exists?(token_file)
+    return
+end
 
-token_json = JSON.parse(File.read("/home/#{user}/token.json"))
+token_json = JSON.parse(File.read(token_file))
 access_token = token_json["id"]
 user_id = token_json["user_id"]
 auth_url = "https://identity.brno.openstack.cloud.e-infra.cz/v3"
@@ -78,6 +83,8 @@ attributes:
   project_id:
     widget: "select"
     label: "Select project"
+    required: true
+    display: true
     help: |
       Select your openstack project
     options:
