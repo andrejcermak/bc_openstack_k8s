@@ -101,11 +101,13 @@ attributes:
   ssh_public_key:
     widget: "text_field"
     label: "ssh public key"
+    required: true
     help: |
       Insert your public key to enable ssh
   control_nodes_count: 
     widget: "number_field"
     label: "Number of kubernetes control nodes"
+    required: true
     value: 1
     help: |
       Select number of control nodes based on your needs
@@ -115,6 +117,7 @@ attributes:
   worker_nodes_count: 
     widget: "number_field"
     label: "Number of kubernetes worker nodes"
+    required: true
     value: 1
     help: |
       Select number of worker nodes based on your needs
@@ -124,6 +127,7 @@ attributes:
   worker_node_flavor:
     widget: "select"
     label: "Select worker node flavor"
+    required: true
     help: |
       Select your worker node flavor
     options:
