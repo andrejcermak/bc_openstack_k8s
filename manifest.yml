@@ -3,5 +3,5 @@ name: Kubernetes on OpenStack (KOST)
 category:  Interactive Apps
 subcategory: Cloud 
 role: batch_connect
-description: Kubernetes infrastructure built with ansible and kubespray over OpenStack. Based on https://gitlab.ics.muni.cz/cloud/kubernetes/kubernetes-infra-example <div> <strong> This infrastructure requires resources beyond the personal project </strong> </div>
+description: Kubernetes infrastructure built over OpenStack. <a href="https://docs.platforms.cloud.e-infra.cz/en/docs/how-to-guides/create-kubernetes"> Learn more</a> <div>  <strong> This infrastructure requires resources beyond the personal project </strong> </div>
 icon: logo.png

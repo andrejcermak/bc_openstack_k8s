@@ -86,7 +86,7 @@ attributes:
     required: true
     display: true
     help: |
-      Select your openstack project
+      Select your OS project. If the dropdown is empty and you already have a project in OpenStack, login to <a href="https://horizon.<%=OPENSTACK_INSTANCE%>/">Horizon</a>  and then refresh this page. If that does not help there might be some issue with OpenStack. In that case please contact <a href=mailto:"cloud@metacentrum.cz">support</a>.
     options:
     <%- projects.each do |project| %>
     - ["<%= project['name'] %>", "<%= project['id'] %>"]
