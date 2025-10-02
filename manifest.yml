@@ -1,5 +1,5 @@
 ---
-name: Kubernetes on OpenStack (KOST)
+name: Kubernetes on OpenStack (KOST) (beta)
 category:  Interactive Apps
 subcategory: Cloud 
 role: batch_connect
