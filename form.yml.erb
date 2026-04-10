@@ -1,73 +1,26 @@
 <%
 require 'json'
-
-Dir.glob('/var/lib/gems/3.1.0/gems/*').each do |dir|
-  if File.directory?(dir) && dir.end_with?('-lib') == false
-    $LOAD_PATH.unshift("#{dir}/lib")
-  end
-end
-
-
-require "fog/openstack"
+require "ood_support/openstack"
 
 user = OodSupport::User.new
 token_file = "/tmp/#{user}-os-token.json"
-unless File.exists?(token_file)
-    return
-end
 
-token_json = JSON.parse(File.read(token_file))
-access_token = token_json["id"]
-user_id = token_json["user_id"]
 openstack_instance = "brno.openstack.cloud.e-infra.cz"
 auth_url = "https://identity.#{openstack_instance}/v3"
 
-connection_params = {
-   openstack_auth_url: auth_url,
-   openstack_management_url: auth_url,
-   openstack_auth_token: access_token,
-}
-identity = Fog::OpenStack::Identity.new(connection_params)
-
-projects = identity.list_user_projects(user_id).body["projects"]
-
-flavors = []
-projects.each do |project|
- auth = {
-    "auth": {
-        "identity": {
-            "methods": [
-                "token"
-            ],
-            "token": {
-                "id": access_token
-            }
-        },
-        "scope": {
-            "project": {
-                "id": project['id']
-            }
-        }
-    }
-  }
-  scoped_token = identity.tokens.authenticate(auth)
-
-  connection_params = {
-    openstack_auth_url: auth_url,
-    openstack_project_name: project['name'],
-    openstack_management_url: "https://compute.#{openstack_instance}/v2.1/#{project['id']}",
-    openstack_auth_token: scoped_token,
-  }
-  compute = Fog::OpenStack::Compute.new(connection_params)
-  compute.flavors.each do |flavor|
-    flavors << [
-      flavor.name, 
-      flavor.name,
-      project['id']
-    ]
-  end
+# Load OpenStack credentials
+token_data = OodSupport::OpenStack::Credentials.load_token(token_file)
+unless token_data
+  return
 end
-flavors = flavors.sort
+
+access_token = OodSupport::OpenStack::Credentials.access_token(token_data)
+user_id = OodSupport::OpenStack::Credentials.user_id(token_data)
+
+# Create helper and fetch projects and flavors
+helper = OodSupport::OpenStack::Helper.new(auth_url: auth_url, openstack_instance: openstack_instance)
+projects = helper.fetch_user_projects(user_id, access_token)
+flavors = helper.fetch_all_flavors(user_id, access_token, projects)
 %>
 ---
 cluster:
@@ -91,7 +44,6 @@ attributes:
     options:
     <%- projects.each do |project| %>
     - ["<%= project['name'] %>", "<%= project['id'] %>"]
-    # - ["<%= project['name'] %>"]
     <%- end %>
   infra_name:
     widget: "text_field"
@@ -105,7 +57,7 @@ attributes:
     required: true
     help: |
       Insert your public key to enable ssh
-  control_nodes_count: 
+  control_nodes_count:
     widget: "number_field"
     label: "Number of kubernetes control nodes"
     required: true
@@ -115,7 +67,7 @@ attributes:
     min: 1
     max: 5
     step: 1
-  worker_nodes_count: 
+  worker_nodes_count:
     widget: "number_field"
     label: "Number of kubernetes worker nodes"
     required: true
@@ -133,7 +85,5 @@ attributes:
       Select your worker node flavor
     options:
     <%- flavors.each do |flavor| %>
-    - ["<%= flavor[0] %>", "<%= flavor[1] %>",
-    data-exclusive-option-for-project-id-<%= flavor[2]%>: true]
+    - ["<%= flavor[0] %>", "<%= flavor[1] %>", data-exclusive-option-for-project-id-<%= flavor[2] %>: true]
    <%- end %>
-
